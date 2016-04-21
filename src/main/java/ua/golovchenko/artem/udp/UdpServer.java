@@ -61,7 +61,7 @@ public class UdpServer {
 
         try(MulticastSocket multicastSocket = new MulticastSocket(5555);){
 
-            String msg = "Hello";
+            String msg = "Hello from ServerSide";
             InetAddress inetAddress = InetAddress.getByName("228.5.6.7");
             //InetAddress inetAddress = InetAddress.getByName("localhost");
             multicastSocket.joinGroup(inetAddress);
@@ -78,7 +78,7 @@ public class UdpServer {
                 multicastSocket.receive(recive);*/
                 // OK, I'm done talking - leave the group...
 
-                sleep(1000);
+                sleep(20000);
             }
             multicastSocket.leaveGroup(inetAddress);
         } catch (IOException e) {

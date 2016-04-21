@@ -57,30 +57,46 @@ public class UdpClient {
         BufferedReader stdIn = new BufferedReader(new InputStreamReader(System.in))){
 
             String line;
-            byte[] buffer = new byte[1000];
+
             InetAddress inetAddress = InetAddress.getByName("228.5.6.7");
             socket.joinGroup(inetAddress);
 
-            boolean run = true;
-            //while (stdIn != null){
-            while (run){
 
-/*                line = stdIn.readLine();
-                buffer = line.getBytes();
-                DatagramPacket packet = new DatagramPacket(buffer,buffer.length,inetAddress,5555);
-                socket.send(packet);*/
+            // Отдельный поток на прослушивание входящих данных
+            Thread t = new Thread(() ->{
+                //boolean run = true;
+                try {
+                    byte[] buffer = new byte[256];
+                    //while (stdIn != null){
+                    while (true) {
 
-                DatagramPacket packet = new DatagramPacket(buffer,buffer.length);
+                        DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
 
-                socket.receive(packet);
-                int byteRecived = packet.getLength();
+                        socket.receive(packet);
+                        int byteRecived = packet.getLength();
 
-                System.out.println("Recived: " + byteRecived + "From: " + packet.getSocketAddress());
-                System.out.println("Принятые данные: " + new String(packet.getData()));
+                        System.out.println("Recived: " + byteRecived + "From: " + packet.getSocketAddress());
+                        System.out.println("Принятые данные: " + new String(packet.getData(),0,packet.getLength()));
 
+                    }
+                }catch (Exception e){
+                    e.printStackTrace();
+                }
+            });
+
+            t.setDaemon(true);
+            t.start();
+
+            while (true){
+                line = stdIn.readLine();
+                byte[] buffer = line.getBytes();
+                DatagramPacket packet = new DatagramPacket(buffer,buffer.length,inetAddress,7777);
+                socket.send(packet);
+                if ("exit".equals(line)) break;
             }
 
             socket.leaveGroup(inetAddress);
+
         } catch (IOException e1) {
             e1.printStackTrace();
         }
